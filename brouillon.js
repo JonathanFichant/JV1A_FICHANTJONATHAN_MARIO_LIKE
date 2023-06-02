@@ -190,7 +190,8 @@
         this.jauge = this.jaugeVisibility.fillRect(764, 388, 128 * (this.jaugeValeurVisibility / 100), 24);
     }*/
 
-
+  /*this.segmentMur = this.add.graphics();
+        this.segmentMur.lineStyle(2, 0x00ff00);*/
 
     /*this.physics.overlap(this.hitboxLight, this.player, function () {
             if (this.stateVisibility != 'visible') {

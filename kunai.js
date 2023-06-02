@@ -31,8 +31,18 @@ class Kunai extends Phaser.Physics.Arcade.Sprite {
         this.alphaCD = 1;
         this.showCD = this.scene.add.graphics();
         this.showCD.fillStyle(0xffffff, this.alphaCD);
-        this.showCD.fillPath(); 
+        this.showCD.fillPath();
 
+        // const particles = this.add.particles('particule');
+        // this.emitter = particles.createEmitter({
+        //     x: this.x,
+        //     y: this.y,
+        //     speed: { min: 0, max: 10 },
+        //     angle: { min: 0, max: 360 },
+        //     scale: { start: 1, end: 0 },
+        //     lifespan: 300,
+        //     blendMode: 'ADD'
+        // });
 
     }
 

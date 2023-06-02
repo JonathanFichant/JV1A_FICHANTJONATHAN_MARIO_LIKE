@@ -23,8 +23,6 @@ class niveau1 extends Phaser.Scene {
 
         this.varTest = 0;
         this.varTest2 = 0;
-        //this.background = this.add.image(212, 653, 'background');
-        //this.background.setOrigin(0, 0).setScale(2);
 
         this.map1 = this.add.tilemap('lvl1');
         this.tileset = this.map1.addTilesetImage('tilesetMario', 'tileset1');
@@ -36,6 +34,9 @@ class niveau1 extends Phaser.Scene {
         this.calque_background3 = this.map1.createLayer('Background 3', this.tileset);
         this.calque_background2 = this.map1.createLayer('Background 2', this.tileset);
         this.calque_background1 = this.map1.createLayer('Background 1', this.tileset);
+        this.calque_blocMob = this.map1.createLayer('blocMob', this.tileset);
+        this.calque_blocMob.visible = false;
+        this.calque_blocMob.setCollisionByProperty({ isSolid: true });
         this.calque_murs = this.map1.createLayer('Solide / Pierre', this.tileset);
         this.calque_murs.setCollisionByProperty({ isSolid: true });
         this.calque_bois = this.map1.createLayer('Solide / Bois', this.tileset);
@@ -61,13 +62,7 @@ class niveau1 extends Phaser.Scene {
         });
 
 
-
-        
-
-
         // LIGHTS
-
-
 
         this.variationIntensity = 3.2;
         this.lightVar = 'down';
@@ -78,7 +73,7 @@ class niveau1 extends Phaser.Scene {
 
         this.lightPlayer = this.lights.addLight(0, 0, this.lightRayon).setIntensity(0).setColor(0xfe1b00); // pour activer le système de lumière partout
 
-        this.lights.enable().setAmbientColor(0x999999); // quand c'est pas éclairé
+        this.lights.enable().setAmbientColor(0xffffff); // quand c'est pas éclairé
 
 
         this.calque_light = this.map1.getObjectLayer('Light');
@@ -150,9 +145,95 @@ class niveau1 extends Phaser.Scene {
         this.angleMob = 0; // sa direction, pas défaut à droite, (gauche : Math.PI, haut : Math.PI/2, bas : -Math.PI/2)
         this.fovMob = Math.PI / 2 // son champ de vision, 90 degrés ici
 
-        // SPAWN joueur
-        this.player = new Player(this, 128, 1280, 'ninja').setScale(0.2, 0.2).setOffset(0, 0).setOrigin(0.4, 1).setSize(512, 1024);
 
+
+
+        // FX du joueur
+        const particlesShadowRun = this.add.particles('shadowRun').setDepth(0);
+        this.emitterShadowRun = particlesShadowRun.createEmitter({
+            x: 0,
+            y: 0,
+            speed: { min: 0, max: 20 },
+            angle: { min: 0, max: 360 },
+            scale: { start: 0.5, end: 0.3 },
+            alpha: 0.5,
+            frequency: 100,
+            lifespan: 600,
+            blendMode: 'NORMAL', //SCREEN
+            visible: false
+        });
+        const particlesShadowRunLeft = this.add.particles('shadowRunLeft').setDepth(0);
+        this.emitterShadowRunLeft = particlesShadowRunLeft.createEmitter({
+            x: 0,
+            y: 0,
+            speed: { min: 0, max: 20 },
+            angle: { min: 0, max: 360 },
+            scale: { start: 0.5, end: 0.3 },
+            alpha: 0.5,
+            frequency: 100,
+            lifespan: 600,
+            blendMode: 'NORMAL', //SCREEN
+            visible: false
+        });
+        const particlesShadowJump = this.add.particles('shadowJump').setDepth(0);
+        this.emitterShadowJump = particlesShadowJump.createEmitter({
+            x: 0,
+            y: 0,
+            speed: { min: 0, max: 20 },
+            angle: { min: 0, max: 360 },
+            scale: { start: 0.5, end: 0.3 },
+            alpha: 0.5,
+            frequency: 100,
+            lifespan: 600,
+            blendMode: 'NORMAL', //SCREEN
+            visible: false
+        });
+        const particlesShadowJumpLeft = this.add.particles('shadowJumpLeft').setDepth(0);
+        this.emitterShadowJumpLeft = particlesShadowJumpLeft.createEmitter({
+            x: 0,
+            y: 0,
+            speed: { min: 0, max: 20 },
+            angle: { min: 0, max: 360 },
+            scale: { start: 0.5, end: 0.3 },
+            alpha: 0.5,
+            frequency: 100,
+            lifespan: 600,
+            blendMode: 'NORMAL', //SCREEN
+            visible: false
+        });
+        const particlesShadowFall = this.add.particles('shadowFall').setDepth(0);
+        this.emitterShadowFall = particlesShadowFall.createEmitter({
+            x: 0,
+            y: 0,
+            speed: { min: 0, max: 20 },
+            angle: { min: 0, max: 360 },
+            scale: { start: 0.5, end: 0.3 },
+            alpha: 0.5,
+            frequency: 100,
+            lifespan: 600,
+            blendMode: 'NORMAL', //SCREEN
+            visible: false
+        });
+        const particlesShadowFallLeft = this.add.particles('shadowFallLeft').setDepth(0);
+        this.emitterShadowFallLeft = particlesShadowFallLeft.createEmitter({
+            x: 0,
+            y: 0,
+            speed: { min: 0, max: 20 },
+            angle: { min: 0, max: 360 },
+            scale: { start: 0.5, end: 0.3 },
+            alpha: 0.5,
+            frequency: 100,
+            lifespan: 600,
+            blendMode: 'NORMAL', //SCREEN
+            visible: false
+        });
+
+
+
+
+        // SPAWN joueur
+        this.player = new Player(this, 128, 1280, 'ninja').setScale(0.5).setOrigin(0.5, 0.5).setSize(100, 512).setOffset(0, 0);
+        //this.objetTest = this.add.sprite(this.player.x, this.player.y, 'animApparition').setScale(0.2);
         this.stateVisibility = 'invisible';
 
         this.physics.add.collider(this.player, this.calque_murs);
@@ -165,7 +246,7 @@ class niveau1 extends Phaser.Scene {
         //this.physics.add.collider(this.player, this.plateformeMove, collideCallback, null, this);
 
 
-        this.animApparition = this.add.sprite(0, 0, 'animApparition').setScale(2.4).setOrigin(0.5, 1)
+        this.animApparition = this.add.sprite(0, 0, 'animApparition').setScale(1.2).setOrigin(0.5, 1)
 
         // hitbox pour faciliter les coins à mettre au niveau des pieds légèrement devant le joueur
         // ou hitbox ronde, apparemment ça marche bien
@@ -192,7 +273,17 @@ class niveau1 extends Phaser.Scene {
 
         this.kunaiTP = new Kunai(this, 0, 0, 'kunaiTP').setOrigin(0.3, 0.5).setScale(0.8).setCircle(13);
 
-
+        const particles = this.add.particles('particule');
+        this.emitter = particles.createEmitter({
+            x: this.kunaiTP.x,
+            y: this.kunaiTP.y,
+            speed: { min: 0, max: 0 }, // dispersion, effet crépitement
+            angle: { min: 0, max: 360 },
+            scale: { start: 0.05, end: 0 },
+            alpha: 0.5,
+            lifespan: 600,
+            blendMode: 'ADD'
+        });
         //this.physics.add.collider(this.plateformeMove, this.kunaiTP);
         this.physics.add.collider(this.plateformes, this.kunaiTP);
         this.physics.add.collider(this.calque_murs, this.kunaiTP);
@@ -201,22 +292,25 @@ class niveau1 extends Phaser.Scene {
 
 
         this.silhouette = this.add.sprite(0, 0, 'silhouette').setScale(0.1132).setOrigin(0.5, 1);
-        this.testPerso = this.add.sprite(9 * 128, 11 * 128 + 22, 'testPerso').setScale(0.12).setPipeline('Light2D');
 
 
-        /*this.segmentMur = this.add.graphics();
-        this.segmentMur.lineStyle(2, 0x00ff00);*/
+
 
         // Spawn mob
 
         this.spawn_mob = false;
         this.mobs = this.physics.add.group({ collideWorldBounds: true });
-        this.mobs.setOrigin(0.5, 0.5);
         //this.physics.add.collider(this.mobs, this.player);
         this.physics.add.collider(this.mobs, this.calque_murs);
         this.physics.add.collider(this.mobs, this.calque_bois);
+        this.physics.add.collider(this.mobs, this.calque_blocMob);
         //this.physics.add.collider(this.mobs, this.mobs);
         //this.physics.add.collider(this.mobs, this.kunaiTP);
+
+        this.symboleDistrait = this.add.sprite(0, 0, 'symboleDistrait').setScale(0.4);
+        this.symboleDistrait.visible = false;
+        this.symboleTraque = this.add.sprite(0, 0, 'symboleTraque').setScale(0.4);
+        this.symboleTraque.visible = false;
 
         this.arrows = this.physics.add.group({ collideWorldsBounds: true });
         this.arrows.setOrigin(0.3, 0.5);
@@ -237,19 +331,13 @@ class niveau1 extends Phaser.Scene {
 
         // Anim mob
         this.anims.create({
-            key: 'mobDroite',
-            frames: this.anims.generateFrameNumbers('marcheSamurai', { start: 0, end: 7 }),
+            key: 'mobMarche',
+            frames: this.anims.generateFrameNumbers('mobMarche', { start: 0, end: 28 }),
             repeat: -1,
-            frameRate: 13,
-        });
-        this.anims.create({
-            key: 'mobGauche',
-            frames: this.anims.generateFrameNumbers('marcheSamurai', { start: 8, end: 15 }),
-            repeat: -1,
-            frameRate: 13,
+            frameRate: 20,
         });
 
-        // faire une classe UI
+        // UI
         this.UIvisibility = this.add.sprite(160, 160, 'visibility'); // a régler à la main si on change le spawn
         this.UIvisibility.setOrigin(0.5, 0.5).setScale(0.5);
         this.UIvisibility.setScrollFactor(0);
@@ -273,13 +361,110 @@ class niveau1 extends Phaser.Scene {
             frameRate: 1,
         });
 
+        this.cdKunai = this.add.sprite(120, 960, 'cdKunai');
+        this.cdKunai.setOrigin(0.5, 0.5).setScale(0.3).setScrollFactor(0);
+
     }
 
     // attribuer la fonction sur un groupe et non un élément pour les hitbox des lumières
 
     update() {
 
-      
+        //FX
+        this.emitter.setPosition(this.kunaiTP.x, this.kunaiTP.y)
+
+        if (this.player.directionPlayer == 'right') {
+            this.emitterShadowRunLeft.visible = false;
+            this.emitterShadowRunLeft.stop();
+            this.emitterShadowJumpLeft.visible = false;
+            this.emitterShadowJumpLeft.stop();
+            this.emitterShadowFallLeft.visible = false;
+            this.emitterShadowFallLeft.stop();
+            if (this.player.anim == 'run') {
+                this.emitterShadowRun.setPosition(this.player.x - 60, this.player.y);
+                this.emitterShadowRun.start();
+                this.emitterShadowRun.visible = true
+
+                this.emitterShadowJump.visible = false;
+                this.emitterShadowJump.stop();
+                this.emitterShadowFall.visible = false;
+                this.emitterShadowFall.stop();
+            }
+            else if (this.player.anim == 'jump') {
+                this.emitterShadowJump.setPosition(this.player.x - 60, this.player.y);
+                this.emitterShadowJump.start();
+                this.emitterShadowJump.visible = true
+
+                this.emitterShadowRun.visible = false;
+                this.emitterShadowRun.stop();
+                this.emitterShadowFall.visible = false;
+                this.emitterShadowFall.stop();
+            }
+            else if (this.player.anim == 'fall') {
+                this.emitterShadowFall.setPosition(this.player.x - 60, this.player.y);
+                this.emitterShadowFall.start();
+                this.emitterShadowFall.visible = true
+
+                this.emitterShadowRun.visible = false;
+                this.emitterShadowRun.stop();
+                this.emitterShadowJump.visible = false;
+                this.emitterShadowJump.stop();
+            }
+            else if (this.player.anim == 'idle') {
+                this.emitterShadowRun.visible = false;
+                this.emitterShadowRun.stop();
+                this.emitterShadowJump.visible = false;
+                this.emitterShadowJump.stop();
+                this.emitterShadowFall.visible = false;
+                this.emitterShadowFall.stop();
+            }
+        }
+        else {
+            this.emitterShadowRun.visible = false;
+            this.emitterShadowRun.stop();
+            this.emitterShadowJump.visible = false;
+            this.emitterShadowJump.stop();
+            this.emitterShadowFall.visible = false;
+            this.emitterShadowFall.stop();
+            if (this.player.anim == 'run') {
+                this.emitterShadowRunLeft.setPosition(this.player.x + 50, this.player.y);
+                this.emitterShadowRunLeft.start();
+                this.emitterShadowRunLeft.visible = true
+
+                this.emitterShadowJumpLeft.visible = false;
+                this.emitterShadowJumpLeft.stop();
+                this.emitterShadowFallLeft.visible = false;
+                this.emitterShadowFallLeft.stop();
+            }
+            else if (this.player.anim == 'jump') {
+                this.emitterShadowJumpLeft.setPosition(this.player.x + 50, this.player.y);
+                this.emitterShadowJumpLeft.start();
+                this.emitterShadowJumpLeft.visible = true
+
+                this.emitterShadowRunLeft.visible = false;
+                this.emitterShadowRunLeft.stop();
+                this.emitterShadowFallLeft.visible = false;
+                this.emitterShadowFallLeft.stop();
+            }
+            else if (this.player.anim == 'fall') {
+                this.emitterShadowFallLeft.setPosition(this.player.x + 50, this.player.y);
+                this.emitterShadowFallLeft.start();
+                this.emitterShadowFallLeft.visible = true
+
+                this.emitterShadowRunLeft.visible = false;
+                this.emitterShadowRunLeft.stop();
+                this.emitterShadowJumpLeft.visible = false;
+                this.emitterShadowJumpLeft.stop();
+            }
+            else if (this.player.anim == 'idle') {
+                this.emitterShadowRunLeft.visible = false;
+                this.emitterShadowRunLeft.stop();
+                this.emitterShadowJumpLeft.visible = false;
+                this.emitterShadowJumpLeft.stop();
+                this.emitterShadowFallLeft.visible = false;
+                this.emitterShadowFallLeft.stop();
+            }
+        }
 
 
 
@@ -343,8 +528,8 @@ class niveau1 extends Phaser.Scene {
                 let length = Math.sqrt(dirX ** 2 + dirY ** 2);
                 dirX /= length;
                 dirY /= length;
-                arrow.setVelocityX(dirX * 2400);
-                arrow.setVelocityY(dirY * 3600); // tir légèrement plus haut que le joueur
+                arrow.setVelocityX(dirX * 2000);
+                arrow.setVelocityY(dirY * 3000); // tir légèrement plus haut que le joueur
             }
             // orientation de la flèche selon sa vitesse
             arrow.angle = Phaser.Math.RadToDeg(Math.atan2(arrow.body.velocity.y, arrow.body.velocity.x));
@@ -365,13 +550,12 @@ class niveau1 extends Phaser.Scene {
             this.mobs.children.each(function (mob) {
 
                 const eye = mob.getData('eye');
-                eye.setPosition(mob.x, mob.y - 260);
-                eye.setScale(0.5);
+                eye.setPosition(mob.x, mob.y - 160);
+                eye.setScale(0.35);
                 let circleEye = mob.getData('circleEye');
                 circleEye.clear();
-                circleEye.fillStyle(0xffffff).fillCircle(mob.x, mob.y - 260, mob.jauge);
+                circleEye.fillStyle(0xffffff).fillCircle(mob.x, mob.y - 160, mob.jauge);
 
-                //console.log(mob.state)
 
 
                 // champ de vision selon sa direction
@@ -379,23 +563,23 @@ class niveau1 extends Phaser.Scene {
                     mob.anims.stop('', true);
                 }
                 else if (mob.direction == 'right') {
-                    mob.anims.play('mobDroite', true);
+                    mob.anims.play('mobMarche', true).setFlipX(false);
                     mob.angleVision = 0; // direction du regard
                     mob.borneMin = 0;
                     mob.borneMax = mob.angleFOV;
                     mob.FOV.clear();
                     mob.FOV.fillStyle(0xffffff, 0.1);
-                    mob.FOV.slice(mob.x, mob.y - 24, mob.scope, Phaser.Math.DegToRad(360 - mob.angleFOV), Phaser.Math.DegToRad(mob.angleFOV), false);
+                    mob.FOV.slice(mob.x, mob.y - 60, mob.scope, Phaser.Math.DegToRad(360 - mob.angleFOV), Phaser.Math.DegToRad(mob.angleFOV), false);
                     mob.FOV.fillPath();
                 }
                 else if (mob.direction == 'left') {
-                    mob.anims.play('mobGauche', true);
+                    mob.anims.play('mobMarche', true).setFlipX(true);
                     mob.angleVision = 180;
                     mob.borneMin = mob.angleVision - mob.angleFOV;
                     mob.borneMax = mob.angleVision;
                     mob.FOV.clear();
                     mob.FOV.fillStyle(0xffffff, 0.2);
-                    mob.FOV.slice(mob.x, mob.y, mob.scope, Phaser.Math.DegToRad(180 - mob.angleFOV), Phaser.Math.DegToRad(180 + mob.angleFOV), false);
+                    mob.FOV.slice(mob.x, mob.y - 60, mob.scope, Phaser.Math.DegToRad(180 - mob.angleFOV), Phaser.Math.DegToRad(180 + mob.angleFOV), false);
                     mob.FOV.fillPath();
                 }
 
@@ -408,6 +592,10 @@ class niveau1 extends Phaser.Scene {
 
                 switch (mob.state) {
                     case 'traque':
+                        this.symboleTraque.x = mob.x;
+                        this.symboleTraque.y = mob.y - 360;
+                        this.symboleDistrait.visible = false;
+                        this.symboleTraque.visible = true;
                         if (mob.ATK == false) {
                             if (mob.x < this.player.x - 20) { // si mob à gauche
                                 mob.setVelocityX(mob.speed * 1.5)
@@ -422,10 +610,10 @@ class niveau1 extends Phaser.Scene {
                             /*if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mob.x, mob.y) < 32 * 1) {
                                 // coup de katana qui tape à 64 pixels devant
                                 // si katana overlap player alors, reset au dernier checkpoint avec fondu au noir
-
+        
                             }
                             else*/
-                            if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mob.x, mob.y) < 128 * 5) {
+                            if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mob.x, mob.y - 60) < 128 * 5) {
                                 // importer objet arrow et faire meme orientation en temps réel que le kunai
                                 // tir à l'arc
                                 // si arrow overlap player alors, reset au dernier checkpoint avec fondu au noir
@@ -445,14 +633,14 @@ class niveau1 extends Phaser.Scene {
                         }
 
 
-                        if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mob.x, mob.y) < 128 * 5) { // si mob est assez prêt il attaque
+                        if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mob.x, mob.y - 60) < 128 * 5) { // si mob est assez prêt il attaque
                             mob.ATK = true;
                         }
                         else {
                             mob.ATK = false;
                         }
 
-                        if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mob.x, mob.y) > 128 * 10) { // si le joueur est à 10 cases du mob, l'ennemi cesse la traque
+                        if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mob.x, mob.y) - 60 > 128 * 10) { // si le joueur est à 10 cases du mob, l'ennemi cesse la traque
                             mob.isWatching = false;
                             mob.state = 'watch'
                             break;
@@ -461,6 +649,10 @@ class niveau1 extends Phaser.Scene {
                         break;
 
                     case 'watch': // regarde autour, A CODER si j'ai le temps
+                        this.symboleDistrait.x = mob.x;
+                        this.symboleDistrait.y = mob.y - 360;
+                        this.symboleDistrait.visible = true;
+                        this.symboleTraque.visible = false;
                         mob.setVelocityX(0);
                         if (mob.isWatching == false) {
                             mob.isWatching = true;
@@ -474,9 +666,9 @@ class niveau1 extends Phaser.Scene {
 
                             });
                         }
-                        if (this.checkDistance(mob.x, mob.y, this.player.x, this.player.y) < mob.scope &&
-                            (mob.borneMin <= Math.abs(Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(mob.x, mob.y, this.player.x, this.player.y))) &&
-                                Math.abs(Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(mob.x, mob.y, this.player.x, this.player.y))) <= mob.borneMax) &&
+                        if (this.checkDistance(mob.x, mob.y - 60, this.player.x, this.player.y) < mob.scope &&
+                            (mob.borneMin <= Math.abs(Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(mob.x, mob.y - 60, this.player.x, this.player.y))) &&
+                                Math.abs(Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(mob.x, mob.y - 60, this.player.x, this.player.y))) <= mob.borneMax) &&
                             (this.stateVisibility == 'visible' || this.stateVisibility == 'semivisible')) {
                             // joueur en vue
                             mob.seePlayer = true;
@@ -504,9 +696,13 @@ class niveau1 extends Phaser.Scene {
                         break;
 
                     case 'distrait': // déplacement vers la dernière position du joueur vu
-                        if (this.checkDistance(mob.x, mob.y, this.player.x, this.player.y) < mob.scope &&
-                            (mob.borneMin <= Math.abs(Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(mob.x, mob.y, this.player.x, this.player.y))) &&
-                                Math.abs(Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(mob.x, mob.y, this.player.x, this.player.y))) <= mob.borneMax) &&
+                        this.symboleDistrait.x = mob.x;
+                        this.symboleDistrait.y = mob.y - 360;
+                        this.symboleDistrait.visible = true;
+                        this.symboleTraque.visible = false;
+                        if (this.checkDistance(mob.x, mob.y - 60, this.player.x, this.player.y) < mob.scope &&
+                            (mob.borneMin <= Math.abs(Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(mob.x, mob.y - 60, this.player.x, this.player.y))) &&
+                                Math.abs(Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(mob.x, mob.y - 60, this.player.x, this.player.y))) <= mob.borneMax) &&
                             (this.stateVisibility == 'visible' || this.stateVisibility == 'semivisible')) {
                             // joueur en vue
                             mob.seePlayer = true;
@@ -533,6 +729,11 @@ class niveau1 extends Phaser.Scene {
                             mob.state = 'watch';
                             break;
                         }
+                        if (mob.body.blocked.right || mob.body.blocked.left) {
+                            mob.jauge = mob.jaugeDistrait - 1;
+                            mob.state = 'patrouille';
+                        }
+
 
                         if (this.checkDistance(mob.x, mob.y, this.player.x, this.player.y) < 160) { // si le joueur est très près
                             mob.jauge += 1.6;
@@ -546,6 +747,8 @@ class niveau1 extends Phaser.Scene {
                         break;
 
                     case 'patrouille':
+                        this.symboleDistrait.visible = false;
+                        this.symboleTraque.visible = false;
                         mob.isWatching = false;
                         if (mob.move == true) { // déplacement en mode patrouille
                             if (mob.direction == 'left') {
@@ -586,9 +789,9 @@ class niveau1 extends Phaser.Scene {
 
 
                         // repérage du joueur
-                        if (this.checkDistance(mob.x, mob.y, this.player.x, this.player.y) < mob.scope) {  // si le joueur est assez proche du mob pour pouvoir être vu
-                            if (mob.borneMin <= Math.abs(Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(mob.x, mob.y, this.player.x, this.player.y))) &&
-                                Math.abs(Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(mob.x, mob.y, this.player.x, this.player.y))) <= mob.borneMax) { // en deux fois sinon trop de calcul
+                        if (this.checkDistance(mob.x, mob.y - 60, this.player.x, this.player.y) < mob.scope) {  // si le joueur est assez proche du mob pour pouvoir être vu
+                            if (mob.borneMin <= Math.abs(Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(mob.x, mob.y - 60, this.player.x, this.player.y))) &&
+                                Math.abs(Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(mob.x, mob.y - 60, this.player.x, this.player.y))) <= mob.borneMax) { // en deux fois sinon trop de calcul
                                 if (this.stateVisibility == 'visible') {
                                     mob.jauge += 1.6;
                                 }
@@ -596,8 +799,13 @@ class niveau1 extends Phaser.Scene {
                                     mob.jauge += 0.2
                                 }
                                 else {
-                                    if (mob.jauge > 0) {
-                                        mob.jauge -= 0.2; // si player dans champ de vision mais dans l'ombre
+                                    if (this.player.body.velocity != 0) {
+                                        mob.jauge += 0.08;
+                                    }
+                                    else {
+                                        if (mob.jauge > 0) {
+                                            mob.jauge -= 0.2; // si player dans champ de vision mais dans l'ombre
+                                        }
                                     }
                                 }
                             }
@@ -613,7 +821,7 @@ class niveau1 extends Phaser.Scene {
                             }
                         }
 
-                        if (this.checkDistance(mob.x, mob.y, this.player.x, this.player.y) < 160) { // si le joueur est très près
+                        if (this.checkDistance(mob.x, mob.y - 60, this.player.x, this.player.y) < 160) { // si le joueur est très près
                             mob.jauge += 1.6;
                         }
 
@@ -631,7 +839,8 @@ class niveau1 extends Phaser.Scene {
         // ANIMATION ET DEPLACEMENT 2 DIRECTIONS
 
         if (this.player.speedPlayer == 0) { // condition pour idle
-            this.player.facing();
+            //this.player.facing();
+            //this.player.anim = 'idle';
             this.cameras.main.setFollowOffset(0, 0);
 
         }
@@ -676,7 +885,7 @@ class niveau1 extends Phaser.Scene {
 
         if (this.player.falling == true && this.player.body.blocked.down) {
             this.animLand.x = this.player.x;
-            this.animLand.y = this.player.y + 18;
+            this.animLand.y = this.player.y + 128;
             this.animLand.anims.play('animTP', true);
             this.player.falling = false;
         }
@@ -697,6 +906,13 @@ class niveau1 extends Phaser.Scene {
 
         // KUNAI
 
+        if (this.kunaiTP.Throw) {
+            this.emitter.visible = true;
+        }
+        else {
+            this.emitter.visible = false;
+        }
+
         if (this.kunaiTP.isMouseClicked == true) {
             if (this.kunaiTP.Throw == false && this.kunaiTP.cooldown == false) { // LANCER DU KUNAI
                 this.kunaiTP.isMouseClicked = false;
@@ -715,7 +931,7 @@ class niveau1 extends Phaser.Scene {
 
                 // animation disparition
                 this.animTP.x = this.player.x;
-                this.animTP.y = this.player.y + 17;
+                this.animTP.y = this.player.y + 128;
                 this.animTP.anims.play('animTP', true);
                 this.player.visible = false; // joueur invisible mais toujours touchable
                 // rajouter une diminution d'alpha très rapide ?
@@ -795,8 +1011,8 @@ class niveau1 extends Phaser.Scene {
             this.kunaiTP.trajectoire.clear();
 
             this.vitesse = (Phaser.Math.Distance.Between(this.player.x, this.player.y, this.input.activePointer.worldX, this.input.activePointer.worldY)) * 4;
-            if (this.vitesse < 1200) { // speed min
-                this.vitesse = 1200
+            if (this.vitesse < 1500) { // speed min
+                this.vitesse = 1500
             }
             else if (this.vitesse > 2800) { // speed max
                 this.vitesse = 2800
@@ -861,8 +1077,8 @@ class niveau1 extends Phaser.Scene {
         this.kunaiTP.x = this.player.x;
         this.kunaiTP.y = this.player.y;
         var speed = (Phaser.Math.Distance.Between(this.player.x, this.player.y, this.input.activePointer.worldX, this.input.activePointer.worldY)) * 4;
-        if (speed < 1200) { // speed min
-            speed = 1200
+        if (speed < 1500) { // speed min
+            speed = 1500
         }
         else if (speed > 2800) { // speed max
             speed = 2800
@@ -876,8 +1092,11 @@ class niveau1 extends Phaser.Scene {
 
     majCD() { // à mettre dans la classe kunai après avoir refait l'UI
         this.kunaiTP.showCD.clear();
-        this.kunaiTP.showCD.fillStyle(0xffffff, this.kunaiTP.alphaCD);
-        this.kunaiTP.showCD.slice(this.player.x + 10, this.player.y + 64, 50, Phaser.Math.DegToRad(270), Phaser.Math.DegToRad(this.kunaiTP.kunaiCD));
+        this.kunaiTP.showCD.setScrollFactor(0);
+        this.kunaiTP.showCD.fillStyle(0xff0000, this.kunaiTP.alphaCD);
+        //this.kunaiTP.showCD.slice(this.player.x + 10, this.player.y + 64, 50, Phaser.Math.DegToRad(270), Phaser.Math.DegToRad(this.kunaiTP.kunaiCD))
+        this.kunaiTP.showCD.slice(120, 960, 90, Phaser.Math.DegToRad(270), Phaser.Math.DegToRad(this.kunaiTP.kunaiCD));
+        this.kunaiTP.showCD.setScrollFactor(0);
         this.kunaiTP.showCD.fillPath();
     }
 
@@ -970,14 +1189,16 @@ class niveau1 extends Phaser.Scene {
 
     spawn_mobs() {
         this.spawn_mob = true;
-
-        this.mobs.create(1080, 256, 'marcheSamurai').anims.play('mobGauche', true).setScale(4,7);
+        //this.mobs.setOrigin(0.5,0.5)
+        this.mobs.create(1080, 256, 'mobMarche').anims.play('mobMarche', true);
         // this.mobs.create(1215, 1400, 'marcheSamurai').anims.play('mobGauche', true).setScale(4);
         // this.mobs.create(1350, 1400, 'marcheSamurai').anims.play('mobGauche', true).setScale(4);
 
         this.mobs.children.each(function (mob) {
+            mob.setScale(0.75).setSize(70, 370).setOffset(170, 150);
 
-            const eye = this.add.sprite(mob.x, mob.y - 100, 'eye').setScale(0.6);
+
+            const eye = this.add.sprite(mob.x, mob.y - 100, 'eye').setScale(0.35);
             mob.setData('eye', eye);
 
             mob.jauge = 0;
@@ -1000,7 +1221,7 @@ class niveau1 extends Phaser.Scene {
 
             mob.angleVision = 0;
             mob.speed = 200;
-            mob.angleFOV = 10;
+            mob.angleFOV = 20;
             mob.scope = 128 * 7;
             mob.borneMin = 0;
             mob.borneMax = 0;
@@ -1009,7 +1230,6 @@ class niveau1 extends Phaser.Scene {
             mob.distMaxSpawn = 128 * 3; // le garde ne s'éloigne pas plus loin que x de son spawn
             mob.waiting = 2; // le garde reste immobile x secondes au bout de sa marche
             mob.retour = false;
-            mob.setSize(12, 28); //resize hitbox
             mob.setPipeline('Light2D');
             mob.seePlayer = false;
             mob.seenXPlayer;
@@ -1018,8 +1238,8 @@ class niveau1 extends Phaser.Scene {
             mob.ATK = false;
             mob.shoot = false;
             mob.cdATK = 1; //cooldown en secondes entre 2 attaques
-            mob.jaugeTraque = 80;
-            mob.jaugeDistrait = 24;
+            mob.jaugeTraque = 50;
+            mob.jaugeDistrait = 14;
 
             /*this.segment = new Phaser.Geom.Line(this.player.x, this.player.y, mob.x, mob.y);
             this.segmentMur.strokeLineShape(this.segment);*/

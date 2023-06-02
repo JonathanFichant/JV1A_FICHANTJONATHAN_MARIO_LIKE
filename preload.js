@@ -13,46 +13,52 @@ class Preload extends Phaser.Scene {
 
         // Personnage
 
-        this.load.spritesheet('idle', 'assets/ninja_idle.png',
-            { frameWidth: 18, frameHeight: 32 }
-        );
-        this.load.spritesheet('animDroite', 'assets/ninja_marche_droite.png',
-            { frameWidth: 20, frameHeight: 32 }
-        );
-        this.load.spritesheet('animGauche', 'assets/ninja_marche_gauche.png',
-            { frameWidth: 20, frameHeight: 32 }
-        );
-        this.load.spritesheet('animBas', 'assets/ninja_marche_bas.png',
-            { frameWidth: 18, frameHeight: 32 }
-        );
-        this.load.spritesheet('animHaut', 'assets/ninja_marche_haut.png',
-            { frameWidth: 20, frameHeight: 32 }
-        );
-        this.load.spritesheet('marcheSamurai', 'assets/samurai1_marche.png',
-            { frameWidth: 20, frameHeight: 32 }
-        );
+
         this.load.spritesheet('animTP', 'assets/animTP.png',
-            { frameWidth: 350, frameHeight: 155 }
-        );
+            { frameWidth: 350, frameHeight: 155 });
+
         this.load.spritesheet('animApparition', 'assets/animApparition.png',
-            { frameWidth: 85, frameHeight: 88 }
-        );
-        this.load.image("testPerso", 'assets/testPerso.png');
-        this.load.spritesheet('narutoRun', 'assets/narutoRunSpritesheet.png',
-            { frameWidth : 1922, frameHeight : 1082});
+            { frameWidth: 170, frameHeight: 176 });
+
+        this.load.spritesheet('narutoRun', 'animations_perso/animNarutoRun6px.png',
+            { frameWidth: 482, frameHeight: 540 });
+
+        this.load.spritesheet('shadowRun', 'animations_perso/shadowRun.png',
+            { frameWidth: 482, frameHeight: 540 });
+        this.load.spritesheet('shadowRunLeft', 'animations_perso/shadowRunLeft.png',
+            { frameWidth: 482, frameHeight: 540 });
+
+        this.load.spritesheet('idle', 'animations_perso/persoIdle6px.png',
+            { frameWidth: 241, frameHeight: 540 });
+
+        this.load.spritesheet('fall', 'animations_perso/animChutePropre6px.png',
+            { frameWidth: 279, frameHeight: 550 });
+
+        this.load.spritesheet('shadowFall', 'animations_perso/shadowFall.png',
+            { frameWidth: 279, frameHeight: 550 });
+        this.load.spritesheet('shadowFallLeft', 'animations_perso/shadowFallLeft.png',
+            { frameWidth: 279, frameHeight: 550 });
+
+        this.load.spritesheet('jump', 'animations_perso/peroSaut6px.png',
+            { frameWidth: 402, frameHeight: 540 });
+
+        this.load.spritesheet('shadowJump', 'animations_perso/shadowJump.png',
+            { frameWidth: 402, frameHeight: 540 });
+        this.load.spritesheet('shadowJumpLeft', 'animations_perso/shadowJumpLeft.png',
+            { frameWidth: 402, frameHeight: 540 });
+
+        this.load.spritesheet('mobMarche', 'animations_perso/animEnnemiPropre6px.png',
+            { frameWidth: 410, frameHeight: 540 });
 
 
         this.load.spritesheet('animFlamme', 'assets/spriteSheetFlamme.png',
             { frameWidth: 106, frameHeight: 256 }
         );
         // Autres éléments
-        this.load.image("marqueTP", 'assets/marqueTP.png');
-        this.load.image("plateformeTest", "assets/plateformeTest.png");
-        this.load.image("murTest", "assets/murTest.png");
-        this.load.image("plateformeMove", "assets/plateformeMove.png");
         this.load.image("kunaiTP", "assets/kunaiTP.png");
         this.load.image("arrow", "assets/arrow.png");
-        this.load.image("eye", "assets/eye.png");
+        this.load.image("particule", "assets/particule.png")
+
         this.load.image("plateformeBrancheInvisible", "assets/plateformeBrancheInvisible.png");
 
         // UI
@@ -60,7 +66,10 @@ class Preload extends Phaser.Scene {
             { frameWidth: 497, frameHeight: 497 }
         );
         this.load.image("silhouette", 'assets/silhouette.png');
-
+        this.load.image("eye", "assets/eye.png");
+        this.load.image("symboleTraque", "assets/exclamationMark.png");
+        this.load.image("symboleDistrait", "assets/questionMark.png");
+        this.load.image('cdKunai', "assets/cdKunai.png");
 
         //Maps
         /* this.load.image('tileset1', 'tiled/tilesetZelda.png'); //import du tileset

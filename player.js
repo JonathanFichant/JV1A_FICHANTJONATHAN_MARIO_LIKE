@@ -22,13 +22,14 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.frictionSol = 120;
         this.hauteurSaut = -800;
         this.hauteurSautFinal = this.hauteurSaut;
-        this.speedMax = 600;
+        this.speedMax = 700;
         this.acceleration = 30;
         this.jumpTimer = 5;
         this.coyoteTime = 10;
         this.coyoteTimer = 0;
         this.speedPlayer = 0
         this.falling = false;
+        this.anim = '';
 
         // INPUT ?
 
@@ -36,38 +37,32 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 
         // Animations
         this.anims.create({
-            key: 'idleRight',
-            frames: this.anims.generateFrameNumbers('idle', { start: 2, end: 2 }),
-            frameRate: 1,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'idleLeft',
-            frames: this.anims.generateFrameNumbers('idle', { start: 1, end: 1 }),
-            frameRate: 1,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'left',
-            frames: this.anims.generateFrameNumbers('animGauche', { start: 0, end: 7 }),
-            frameRate: 13,
-            repeat: -1
-        });
-        /*this.anims.create({
-            key: 'right',
-            frames: this.anims.generateFrameNumbers('animDroite', { start: 0, end: 7 }),
-            frameRate: 13,
-            repeat: -1
-        });*/
-        this.anims.create({
-            key: 'right',
+            key: 'run',
             frames: this.anims.generateFrameNumbers('narutoRun', { start: 0, end: 18 }),
+            frameRate: 40,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'idle',
+            frames: this.anims.generateFrameNumbers('idle', { start: 0, end: 28 }),
             frameRate: 20,
             repeat: -1
         });
-       
+        this.anims.create({
+            key: 'fall',
+            frames: this.anims.generateFrameNumbers('fall', { start: 0, end: 22 }),
+            frameRate: 20,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'jump',
+            frames: this.anims.generateFrameNumbers('jump', { start: 0, end: 13 }),
+            frameRate: 20,
+            repeat: -1
+        });
 
-        
+
+
 
     }
 
@@ -77,9 +72,24 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 
     update() {
 
-        if (this.body.velocity.y >=  400){
+        if (this.body.velocity.y >= 1200) {
             this.falling = true;
         }
+
+        //anim
+        if (this.body.velocity.y > 0) {
+            this.anim = 'fall';
+        }
+        else if (this.body.velocity.y < 0) {
+            this.anim = 'jump';
+        }
+        else if (this.body.velocity.y == 0 && this.body.velocity.x != 0){
+            this.anim = 'run';
+        }
+        else {
+            this.anim = 'idle';
+        }
+
 
 
 
@@ -109,7 +119,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             }
         }
 
-        if (this.body.velocity.y > 800) { // vitesse de chute capée
+        if (this.body.velocity.y > 1200) { // vitesse de chute capée
             this.setVelocityY(800);
         }
 
@@ -118,6 +128,57 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             if (this.alpha >= 1) {
                 this.apparition = false;
             }
+        }
+
+        // switch case animation
+        switch (this.anim) {
+            case 'run':
+                if (this.directionPlayer == 'right') {
+                    this.anims.play('run', true).setFlipX(false);
+                    this.setOffset(210,0);
+                }
+                if (this.directionPlayer == 'left') {
+                    this.anims.play('run', true).setFlipX(true);
+                    this.setOffset(180,0);
+                }
+                break;
+
+            case 'jump':
+                if (this.directionPlayer == 'right') {
+                    this.anims.play('jump', true).setFlipX(false);
+                    this.setOffset(180,0);
+                }
+                if (this.directionPlayer == 'left') {
+                    this.anims.play('jump', true).setFlipX(true);
+                    this.setOffset(128,0);
+                }
+                break;
+
+            case 'fall':
+                if (this.directionPlayer == 'right') {
+                    this.anims.play('fall', true).setFlipX(false);//.setAngle(Phaser.Math.RadToDeg(Math.atan2(this.body.velocity.y, this.body.velocity.x))-45);
+                    this.setOffset(110,0);
+                }
+                if (this.directionPlayer == 'left') {
+                    this.anims.play('fall', true).setFlipX(true);
+                    this.setOffset(68,0);
+                }
+                break;
+
+            case 'idle':
+                if (this.directionPlayer == 'right') {
+                    this.anims.play('idle', true).setFlipX(false);
+                    this.setOffset(100,0);
+                }
+                if (this.directionPlayer == 'left') {
+                    this.anims.play('idle', true).setFlipX(true);
+                    this.setOffset(45,0);
+                }
+                break;
+
+            case '':
+                break;
+
         }
     }
 
@@ -131,25 +192,14 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.coyoteTimer = 0;
     }
 
-    facing() {
+    /*facing() {
         if (this.directionPlayer == 'right') {
-            this.anims.play('idleRight', true);
+            this.anims.play('idle', true).setFlipX(false);
         }
         if (this.directionPlayer == 'left') {
-            this.anims.play('idleLeft', true);
+            this.anims.play('idle', true).setFlipX(true);
         }
-    }
-
-    left() { // déplacement à gauche
-        this.anims.play('right', true).setFlipX(true);
-        this.directionPlayer = 'left';
-        if (Math.abs(this.speedPlayer) < this.speedMax) {
-            this.speedPlayer -= this.acceleration;
-        }
-        else {
-            this.speedPlayer = -this.speedMax;
-        }
-    }
+    }*/
 
     right() { // déplacement à droite
         if (Math.abs(this.speedPlayer) < this.speedMax) {
@@ -158,8 +208,17 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         else {
             this.speedPlayer = this.speedMax;
         }
-        this.anims.play('right', true).setFlipX(false);
         this.directionPlayer = 'right';
+    }
+
+    left() { // déplacement à gauche
+        this.directionPlayer = 'left';
+        if (Math.abs(this.speedPlayer) < this.speedMax) {
+            this.speedPlayer -= this.acceleration;
+        }
+        else {
+            this.speedPlayer = -this.speedMax;
+        }
     }
 
     friction() { // friction au sol
@@ -173,8 +232,6 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             this.speedPlayer += this.frictionSol;
         }
     }
-
-
 
 }
 export default Player;
