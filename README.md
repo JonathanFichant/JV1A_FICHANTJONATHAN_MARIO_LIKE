@@ -9,8 +9,8 @@ Inputs :
 - Q / gauche : Déplacement à gauche
 - S / bas : Regarder en bas
 
-- Saut + S / bas : descendre de la plateforme
+- Saut + S / bas : Descendre de la plateforme
 
-- Clic droit : tirer / se téléporter
-- F : afficher la trajectoire
+- Clic droit : Tirer / Se téléporter
+- F : Afficher la trajectoire
 
