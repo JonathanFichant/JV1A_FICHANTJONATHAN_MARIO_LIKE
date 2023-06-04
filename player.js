@@ -21,7 +21,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.directionPlayer = 'right';
         this.frictionSol = 200;
         this.frictionAir = 20;
-        this.hauteurSaut = -1750; //-1000 
+        this.hauteurSaut = -1750;
         this.hauteurSautFinal = this.hauteurSaut;
         this.speedMax = 800;
         this.acceleration = 30;
@@ -192,9 +192,9 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     // fonctions propre à l'objet player
 
     jump() { // saut analogique
-        this.hauteurSautFinal = this.hauteurSaut;
+        //this.hauteurSautFinal = this.hauteurSaut;
         this.jumpActif = true;
-        this.jumpTimer = 20;
+        //this.jumpTimer = 20;
         this.setVelocityY(this.hauteurSaut)
         this.coyoteTimer = 0;
     }

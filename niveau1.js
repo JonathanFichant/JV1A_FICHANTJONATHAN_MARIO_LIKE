@@ -891,13 +891,13 @@ class niveau1 extends Phaser.Scene {
             this.player.jump();
         }
 
-        if (this.player.jumpActif == true) { // pour le saut analogique, A CORRIGER
+        /*if (this.player.jumpActif == true) { // pour le saut analogique, A CORRIGER
             this.player.jumpTimer -= 1;
             this.player.hauteurSautFinal += 3
             if ((this.cursors.up.isDown || this.keyZ.isDown || this.cursors.space.isDown) && this.player.jumpTimer > 0) {
                 this.player.setVelocityY(this.player.hauteurSautFinal)
             }
-        }
+        }*/
 
 
         if (this.player.falling == true && this.player.body.blocked.down) {
