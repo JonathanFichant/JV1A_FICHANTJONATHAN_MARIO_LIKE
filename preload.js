@@ -54,11 +54,7 @@ class Preload extends Phaser.Scene {
 
         // Autres éléments
 
-        this.load.spritesheet('lanterne', 'assets/lanterne.png',
-            { frameWidth: 128, frameHeight: 128 }
-        );
-        this.load.image("luneBleue", "assets/luneBleue.png");
-        this.load.image("luneJaune", "assets/luneJaune.png");
+   
         this.load.image("luneJaune2", "assets/luneJaune2.png");
 
         this.load.spritesheet('animFlamme', 'assets/spriteSheetFlamme.png',
