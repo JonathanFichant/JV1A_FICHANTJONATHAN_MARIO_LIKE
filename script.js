@@ -1,10 +1,12 @@
 
 
 import PreloadScene from './preload.js';
+import menuScene from './menuScene.js';
 import niveau1 from './niveau1.js';
 import niveau2 from './niveau2.js';
-/*import menuScene from './menuScene.js';
-import sceneFin from './sceneFin.js';*/
+import ecranFin from './sceneFin.js';
+
+/*import sceneFin from './sceneFin.js';*/
 
 
 
@@ -26,8 +28,8 @@ var config = { // initialisation de phaser
         }
     },
     pixelArt: true,
-    input: { gamepad: true },
-    scene: [PreloadScene, niveau1, niveau2/*, menuScene, sceneFin*/]
+    // input: { gamepad: true },
+    scene: [PreloadScene, niveau1, niveau2, menuScene, ecranFin]
 };
 
 new Phaser.Game(config);
