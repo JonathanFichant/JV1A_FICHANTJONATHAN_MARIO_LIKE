@@ -250,7 +250,7 @@ class niveau1 extends Phaser.Scene {
         });
 
         // PLAYER 2,67,5
-        this.player = new Player(this, 128 * 252, 128 * 0, 'ninja').setScale(0.5).setOrigin(0.5, 0.5).setSize(100, 510).setOffset(0, 0);
+        this.player = new Player(this, 128 * 2, 128 * 67.5, 'ninja').setScale(0.5).setOrigin(0.5, 0.5).setSize(100, 510).setOffset(0, 0);
         this.stateVisibility = 'invisible';
         this.physics.add.collider(this.player, this.calque_murs);
         this.physics.add.collider(this.player, this.calque_bois);
