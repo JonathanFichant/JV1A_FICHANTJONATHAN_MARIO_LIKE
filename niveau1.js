@@ -113,7 +113,6 @@ class niveau1 extends Phaser.Scene {
         this.calque_herbe.setPipeline('Light2D');
         this.calque_branches.setPipeline('Light2D');
 
-
         this.hitboxsLightExt = this.physics.add.group(); //staticGroup faisait ralentir le perso et sauter dans les airs
         this.calque_light.objects.forEach(eachHitBox => {
             this.hitboxLightExt = this.hitboxsLightExt.create(eachHitBox.x - 436, eachHitBox.y - 504, "");
