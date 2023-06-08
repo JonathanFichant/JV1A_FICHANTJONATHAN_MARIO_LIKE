@@ -239,7 +239,7 @@ class niveau2 extends Phaser.Scene {
 
 
         // SPAWN joueur 8.5/10.4
-        this.player = new Player(this, 128 * 250, 128 * 11.5, 'ninja').setScale(0.5).setOrigin(0.5, 0.5).setSize(100, 510).setOffset(0, 0);
+        this.player = new Player(this, 128 * 8.5, 128 * 10.4, 'ninja').setScale(0.5).setOrigin(0.5, 0.5).setSize(100, 510).setOffset(0, 0);
         //this.objetTest = this.add.sprite(this.player.x, this.player.y, 'animApparition').setScale(0.2);
         this.stateVisibility = 'invisible';
 
