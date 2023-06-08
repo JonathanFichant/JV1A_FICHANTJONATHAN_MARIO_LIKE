@@ -30,7 +30,10 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.coyoteTimer = 0;
         this.speedPlayer = 0
         this.falling = false;
+        this.dustJump = false;
         this.anim = '';
+        this.dead = false;
+        this.checkDead = false;
 
         // INPUT ?
 
@@ -187,6 +190,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
                 break;
 
         }
+        //console.log(this.anim)
     }
 
     // fonctions propre à l'objet player
@@ -196,17 +200,10 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.jumpActif = true;
         //this.jumpTimer = 20;
         this.setVelocityY(this.hauteurSaut)
+        this.dustJump = true;
         this.coyoteTimer = 0;
     }
 
-    /*facing() {
-        if (this.directionPlayer == 'right') {
-            this.anims.play('idle', true).setFlipX(false);
-        }
-        if (this.directionPlayer == 'left') {
-            this.anims.play('idle', true).setFlipX(true);
-        }
-    }*/
 
     right() { // déplacement à droite
         // if (Math.abs(this.speedPlayer) < this.speedMax) {

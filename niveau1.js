@@ -25,11 +25,30 @@ class niveau1 extends Phaser.Scene {
         this.varTest = 0;
         this.varTest2 = 0;
 
+        //sound
+
+        this.jumpSound = this.sound.add('jumpSound');
+        this.jumpSound.setVolume(0.01);
+        this.nightSound = this.sound.add("nightSound", { loop: true });
+        this.nightSound.setVolume(0.07);
+        this.nightSound.play();
+        this.runSound = this.sound.add("runSound", { loop: true });
+        this.runSound.setVolume(0.03);
+
+
         this.map1 = this.add.tilemap('lvl1');
         this.tileset = this.map1.addTilesetImage('tilesetMario', 'tileset1');
         // Import de tous les calques
 
         this.calque_background4 = this.map1.createLayer('Background 4', this.tileset);
+
+
+        this.luneJaune2 = this.add.sprite(1800, 512, 'luneJaune2');
+        this.luneJaune2.setOrigin(0.5, 0.5).setScale(0.17);
+        this.luneJaune2.setScrollFactor(0.03, 0.08);
+
+        this.calque_background35 = this.map1.createLayer('Background 3.5', this.tileset);
+        this.calque_arbresParallax = this.map1.createLayer('Arbres parralax', this.tileset);
         this.calque_background3 = this.map1.createLayer('Background 3', this.tileset);
         this.calque_background2 = this.map1.createLayer('Background 2', this.tileset);
         this.calque_background1 = this.map1.createLayer('Background 1', this.tileset);
@@ -50,7 +69,6 @@ class niveau1 extends Phaser.Scene {
             this.plateforme.body.checkCollision.down = false;
             this.plateforme.body.checkCollision.right = false;
             this.plateforme.body.checkCollision.left = false;
-            this.plateforme.setPipeline('Light2D');
         });
 
         this.anims.create({
@@ -64,39 +82,27 @@ class niveau1 extends Phaser.Scene {
             key: 'kunaiPick',
             frames: this.anims.generateFrameNumbers('kunaiPickUp', { start: 0, end: 11 }),
             repeat: -1,
-            frameRate: 10,
+            frameRate: 8,
         });
-
 
 
         // LIGHTS
 
-        this.variationIntensity = 3.2;
+        this.variationIntensity = 7;
         this.lightVar = 'down';
         this.lightRayon = 512;
 
-        this.lumiereTest = this.lights.addLight(512, 1200, this.lightRayon).setIntensity(this.variationIntensity).setColor(0xfe1b00); // x,y, rayon ou diamètre
-
-
         this.lightPlayer = this.lights.addLight(0, 0, this.lightRayon).setIntensity(0).setColor(0xfe1b00); // pour activer le système de lumière partout
 
-        this.lights.enable().setAmbientColor(0x888888); // quand c'est pas éclairé
-
+        this.lights.enable().setAmbientColor(0x444444); // quand c'est pas éclairé
 
         this.calque_light = this.map1.getObjectLayer('Light');
         this.flammes = this.physics.add.staticGroup();
         this.calque_light.objects.forEach(eachflammes => {
             this.flamme = this.flammes.create(eachflammes.x + 64, eachflammes.y - 70, 'animFlammes');
             this.flamme.anims.play('animFlammes', true, Math.floor(Math.random() * 6));
-            this.lumiere = this.lights.addLight(this.flamme.x, this.flamme.y, this.lightRayon).setIntensity(this.variationIntensity).setColor(0xfe1b00);
+            this.lumiere = this.lights.addLight(this.flamme.x, this.flamme.y, this.lightRayon + 256).setIntensity(this.variationIntensity).setColor(0xfe1b00);
         });
-
-        this.lumieres = [];
-        this.calque_light.objects.forEach(eachLumiere => {
-            const lumiere = this.lights.addLight(eachLumiere.x + 64, eachLumiere - 74, this.lightRayon).setIntensity(this.variationIntensity).setColor(0xfe1b00);
-            this.lumieres.push(lumiere); // Ajouter la lumière à un tableau
-        });
-
 
         this.calque_murs.setPipeline('Light2D');
         this.calque_bois.setPipeline('Light2D');
@@ -105,6 +111,8 @@ class niveau1 extends Phaser.Scene {
         this.calque_background3.setPipeline('Light2D');
         this.calque_background4.setPipeline('Light2D');
         this.calque_herbe.setPipeline('Light2D');
+        this.calque_branches.setPipeline('Light2D');
+
 
         this.hitboxsLightExt = this.physics.add.group(); //staticGroup faisait ralentir le perso et sauter dans les airs
         this.calque_light.objects.forEach(eachHitBox => {
@@ -124,7 +132,6 @@ class niveau1 extends Phaser.Scene {
         this.calque_torche = this.map1.createLayer('Support torche', this.tileset);
         this.calque_torche.setPipeline('Light2D');
 
-
         this.kunaiPickUp = this.physics.add.sprite(128 * 262 + 64, 10.3 * 128, 'kunaiPick').setScale(1.5);
         this.kunaiPickUp.anims.play('kunaiPick', true);
         this.kunaiPickUp.body.allowGravity = false;
@@ -143,27 +150,18 @@ class niveau1 extends Phaser.Scene {
         this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
 
 
-        // Variable du mob
-        this.spawn_mob = false;
-        this.angleMob = 0; // sa direction, pas défaut à droite, (gauche : Math.PI, haut : Math.PI/2, bas : -Math.PI/2)
-        this.fovMob = Math.PI / 2 // son champ de vision, 90 degrés ici
-
-
-
-
         // FX du joueur
-        /*const particlesShadowRun = this.add.particles('shadowRun').setDepth(0);
+        const particlesShadowRun = this.add.particles('shadowRun').setDepth(0);
         this.emitterShadowRun = particlesShadowRun.createEmitter({
             x: 0,
             y: 0,
             speed: { min: 0, max: 20 },
             angle: { min: 0, max: 360 },
-            scale: { start: 0.5, end: 0.3 },
-            alpha: 0.5,
-            frequency: 100,
-            lifespan: 600,
+            scale: { start: 0.5, end: 0.5 },
+            alpha: { start: 0.7, end: 0 },
+            frequency: 300,
+            lifespan: 1200,
             blendMode: 'NORMAL', //SCREEN
-            visible: false
         });
         const particlesShadowRunLeft = this.add.particles('shadowRunLeft').setDepth(0);
         this.emitterShadowRunLeft = particlesShadowRunLeft.createEmitter({
@@ -171,12 +169,12 @@ class niveau1 extends Phaser.Scene {
             y: 0,
             speed: { min: 0, max: 20 },
             angle: { min: 0, max: 360 },
-            scale: { start: 0.5, end: 0.3 },
-            alpha: 0.5,
-            frequency: 100,
-            lifespan: 600,
+            scale: { start: 0.5, end: 0.5 },
+            alpha: { start: 0.7, end: 0 },
+            frequency: 300,
+            lifespan: 1200,
             blendMode: 'NORMAL', //SCREEN
-            visible: false
+
         });
         const particlesShadowJump = this.add.particles('shadowJump').setDepth(0);
         this.emitterShadowJump = particlesShadowJump.createEmitter({
@@ -184,12 +182,12 @@ class niveau1 extends Phaser.Scene {
             y: 0,
             speed: { min: 0, max: 20 },
             angle: { min: 0, max: 360 },
-            scale: { start: 0.5, end: 0.3 },
-            alpha: 0.5,
-            frequency: 100,
-            lifespan: 600,
+            scale: { start: 0.5, end: 0.5 },
+            alpha: { start: 0.7, end: 0 },
+            frequency: 180,
+            lifespan: 1200,
             blendMode: 'NORMAL', //SCREEN
-            visible: false
+
         });
         const particlesShadowJumpLeft = this.add.particles('shadowJumpLeft').setDepth(0);
         this.emitterShadowJumpLeft = particlesShadowJumpLeft.createEmitter({
@@ -197,12 +195,12 @@ class niveau1 extends Phaser.Scene {
             y: 0,
             speed: { min: 0, max: 20 },
             angle: { min: 0, max: 360 },
-            scale: { start: 0.5, end: 0.3 },
-            alpha: 0.5,
-            frequency: 100,
-            lifespan: 600,
+            scale: { start: 0.5, end: 0.5 },
+            alpha: { start: 0.7, end: 0 },
+            frequency: 180,
+            lifespan: 1200,
             blendMode: 'NORMAL', //SCREEN
-            visible: false
+
         });
         const particlesShadowFall = this.add.particles('shadowFall').setDepth(0);
         this.emitterShadowFall = particlesShadowFall.createEmitter({
@@ -210,12 +208,12 @@ class niveau1 extends Phaser.Scene {
             y: 0,
             speed: { min: 0, max: 20 },
             angle: { min: 0, max: 360 },
-            scale: { start: 0.5, end: 0.3 },
-            alpha: 0.5,
-            frequency: 100,
-            lifespan: 600,
+            scale: { start: 0.5, end: 0.5 },
+            alpha: { start: 0.7, end: 0 },
+            frequency: 180,
+            lifespan: 1200,
             blendMode: 'NORMAL', //SCREEN
-            visible: false
+
         });
         const particlesShadowFallLeft = this.add.particles('shadowFallLeft').setDepth(0);
         this.emitterShadowFallLeft = particlesShadowFallLeft.createEmitter({
@@ -223,39 +221,42 @@ class niveau1 extends Phaser.Scene {
             y: 0,
             speed: { min: 0, max: 20 },
             angle: { min: 0, max: 360 },
-            scale: { start: 0.5, end: 0.3 },
-            alpha: 0.5,
-            frequency: 100,
-            lifespan: 600,
+            scale: { start: 0.5, end: 0.5 },
+            alpha: { start: 0.7, end: 0 },
+            frequency: 180,
+            lifespan: 1200,
             blendMode: 'NORMAL', //SCREEN
-            visible: false
+
         });
-*/
+        this.emitterFall = false;
+        this.emitterJump = false;
+        this.emitterRun = false;
+        this.emitterFallLeft = false;
+        this.emitterJumpLeft = false;
+        this.emitterRunLeft = false;
+        const particlesDust = this.add.particles('animApparition').setDepth(0);
+        this.emitterDust = particlesDust.createEmitter({
+            x: 0,
+            y: 0,
+            speed: { min: 30, max: 90 },
+            angle: { min: 0, max: 360 },
+            rotation: { min: 0, max: 360 },
+            scale: { start: 0.6, end: 0.3 },
+            alpha: { start: 0.7, end: 0 },
+            frequency: 200,
+            lifespan: 700,
+            blendMode: 'NORMAL', //SCREEN
+            visible: false,
+        });
 
-
-
-        // SPAWN joueur
-        this.player = new Player(this, 128 * 2, 128 * 67, 'ninja').setScale(0.5).setOrigin(0.5, 0.5).setSize(100, 510).setOffset(0, 0);
-        //this.objetTest = this.add.sprite(this.player.x, this.player.y, 'animApparition').setScale(0.2);
+        // PLAYER 2,67,5
+        this.player = new Player(this, 128 * 252, 128 * 0, 'ninja').setScale(0.5).setOrigin(0.5, 0.5).setSize(100, 510).setOffset(0, 0);
         this.stateVisibility = 'invisible';
-
         this.physics.add.collider(this.player, this.calque_murs);
         this.physics.add.collider(this.player, this.calque_bois);
         this.physics.add.overlap(this.kunaiPickUp, this.player, this.pickUpKunai, null, this);
-
-        //this.physics.add.collider(this.player, this.plateformeTest, this.collidePlateformeTest, null, this);
-        //this.plateformeTest.body.checkCollision.down = false;
-        //this.physics.add.collider(this.player, this.murTest);
         this.physics.add.collider(this.player, this.plateformes, this.collidePlateformeTest, null, this);
-        //this.physics.add.collider(this.player, this.plateformeMove, collideCallback, null, this);
-
-
         this.animApparition = this.add.sprite(0, 0, 'animApparition').setScale(1.2).setOrigin(0.5, 1)
-
-        // hitbox pour faciliter les coins à mettre au niveau des pieds légèrement devant le joueur
-        // ou hitbox ronde, apparemment ça marche bien
-
-
         this.anims.create({
             key: 'animTP',
             frames: this.anims.generateFrameNumbers('animTP', { start: 0, end: 8 }),
@@ -263,29 +264,27 @@ class niveau1 extends Phaser.Scene {
             frameRate: 9,
         });
         this.animTP = this.add.sprite(0, 0, 'animTP').setScale(0.8).setOrigin(0.5, 1)
-
         this.animLand = this.add.sprite(0, 0, 'animTP').setScale(0.4).setOrigin(0.5, 1);
-
         this.anims.create({
             key: 'animApparition',
             frames: this.anims.generateFrameNumbers('animApparition', { start: 0, end: 10 }),
             repeat: 0,
             frameRate: 18,
         });
-
         this.silhouette = this.add.sprite(0, 0, 'silhouette').setScale(0.1132).setOrigin(0.5, 1);
+
 
         this.hitboxCheckpoint = this.add.rectangle(171 * 128, 43 * 128, 512, 2048, 0xff0000);
         this.physics.add.existing(this.hitboxCheckpoint);
         this.hitboxCheckpoint.body.setAllowGravity(false);
         this.hitboxCheckpoint.setVisible(false);
-
         this.spawnPlayerX = 75 * 128;
         this.spawnPlayerY = 53 * 128;
-        this.physics.add.overlap(this.hitboxCheckpoint, this.player, this.refreshCheckpoint, null, this);  
-        
-        
+        this.physics.add.overlap(this.hitboxCheckpoint, this.player, this.refreshCheckpoint, null, this);
+
+
         // Spawn mob
+        this.spawn_mob = false;
         this.mobs = this.physics.add.group({ collideWorldBounds: true });
         this.physics.add.collider(this.mobs, this.calque_murs);
         this.physics.add.collider(this.mobs, this.calque_bois);
@@ -298,10 +297,12 @@ class niveau1 extends Phaser.Scene {
         });
         this.spawn_mobs();
 
-        this.symboleDistrait = this.add.sprite(0, 0, 'symboleDistrait').setScale(0.4);
-        this.symboleDistrait.visible = false;
-        this.symboleTraque = this.add.sprite(0, 0, 'symboleTraque').setScale(0.4);
-        this.symboleTraque.visible = false;
+        this.anims.create({
+            key: 'mobMarche',
+            frames: this.anims.generateFrameNumbers('mobMarche', { start: 0, end: 28 }),
+            repeat: -1,
+            frameRate: 20,
+        });
 
         this.arrows = this.physics.add.group({ collideWorldsBounds: true });
         this.arrows.setOrigin(0.3, 0.5);
@@ -310,23 +311,19 @@ class niveau1 extends Phaser.Scene {
         this.physics.add.collider(this.arrows, this.plateformes);
 
 
-
-
         // CAMERA
 
-        this.physics.world.setBounds(0, 0, this.scene.width, this.scene.heigh); // Défini les limites où le joueur peut aller, limites où la physiques s'appliquent ?
-        this.cameras.main.setBounds(0, 0, this.scene.width, this.scene.height); // Défini les limites de la caméra (début x, début y, fin x, fin y)
+        this.physics.world.setBounds(0, 0, 270 * 128, 70 * 128); // Défini les limites où le joueur peut aller, limites où la physiques s'appliquent ?
+        this.cameras.main.setBounds(0, 0, 270 * 128, 70 * 128); // Défini les limites de la caméra (début x, début y, fin x, fin y)
         this.cameras.main.startFollow(this.player, true, 0.04, 0.02); //ancrage de la caméra sur l'objet player
         this.cameras.main.setZoom(0.7);
 
 
-        // Anim mob
-        this.anims.create({
-            key: 'mobMarche',
-            frames: this.anims.generateFrameNumbers('mobMarche', { start: 0, end: 28 }),
-            repeat: -1,
-            frameRate: 20,
-        });
+        this.calque_background3.setScrollFactor(0.93, 1);
+        this.calque_arbresParallax.setScrollFactor(0.85, 1);
+        this.calque_premierPlan = this.map1.createLayer('Premier plan', this.tileset);//setScrollFactor(0.98, 1);
+        this.calque_premierPlan.setPipeline("Light2D")
+
 
         // UI
         this.UIvisibility = this.add.sprite(-200, -24, 'visibility'); // a régler à la main si on change le spawn
@@ -351,146 +348,146 @@ class niveau1 extends Phaser.Scene {
             repeat: 0,
             frameRate: 1,
         });
-
-        /*this.cdKunai = this.add.sprite(-250, 1150, 'cdKunai');
-        this.cdKunai.setOrigin(0.5, 0.5).setScale(0.4).setScrollFactor(0).setDepth(1);*/
-
-
-
-
     }
-
-    // attribuer la fonction sur un groupe et non un élément pour les hitbox des lumières
 
     update() {
 
         //FX
-        /*
-                if (this.player.directionPlayer == 'right') {
-                    this.emitterShadowRunLeft.visible = false;
+
+        if (this.player.directionPlayer == 'right') {
+            this.emitterRunLeft = false;
+            this.emitterFallLeft = false;
+            this.emitterJumpLeft = false;
+            if (this.player.anim == 'run') {
+                if (this.emitterRun == false) {
+                    this.emitterRun = true
+                    this.emitterFall = false;
+                    this.emitterJump = false;
+                    this.runSound.play();
+                    this.emitterShadowRun.start();
+                    this.emitterDust.start();
                     this.emitterShadowRunLeft.stop();
-                    this.emitterShadowJumpLeft.visible = false;
-                    this.emitterShadowJumpLeft.stop();
-                    this.emitterShadowFallLeft.visible = false;
-                    this.emitterShadowFallLeft.stop();
-                    if (this.player.anim == 'run') {
-                        this.emitterShadowRun.setPosition(this.player.x, this.player.y);
-                        this.emitterShadowRun.start();
-                        this.emitterShadowRun.visible = true
-        
-                        this.emitterShadowJump.visible = false;
-                        this.emitterShadowJump.stop();
-                        this.emitterShadowFall.visible = false;
-                        this.emitterShadowFall.stop();
-                    }
-                    else if (this.player.anim == 'jump') {
-                        this.emitterShadowJump.setPosition(this.player.x, this.player.y);
-                        this.emitterShadowJump.start();
-                        this.emitterShadowJump.visible = true
-        
-                        this.emitterShadowRun.visible = false;
-                        this.emitterShadowRun.stop();
-                        this.emitterShadowFall.visible = false;
-                        this.emitterShadowFall.stop();
-                    }
-                    else if (this.player.anim == 'fall') {
-                        this.emitterShadowFall.setPosition(this.player.x, this.player.y);
-                        this.emitterShadowFall.start();
-                        this.emitterShadowFall.visible = true
-        
-                        this.emitterShadowRun.visible = false;
-                        this.emitterShadowRun.stop();
-                        this.emitterShadowJump.visible = false;
-                        this.emitterShadowJump.stop();
-                    }
-                    else if (this.player.anim == 'idle') {
-                        this.emitterShadowRun.visible = false;
-                        this.emitterShadowRun.stop();
-                        this.emitterShadowJump.visible = false;
-                        this.emitterShadowJump.stop();
-                        this.emitterShadowFall.visible = false;
-                        this.emitterShadowFall.stop();
-                    }
-                }
-                else {
-                    this.emitterShadowRun.visible = false;
-                    this.emitterShadowRun.stop();
-                    this.emitterShadowJump.visible = false;
                     this.emitterShadowJump.stop();
-                    this.emitterShadowFall.visible = false;
                     this.emitterShadowFall.stop();
-                    if (this.player.anim == 'run') {
-                        this.emitterShadowRunLeft.setPosition(this.player.x, this.player.y);
-                        this.emitterShadowRunLeft.start();
-                        this.emitterShadowRunLeft.visible = true
-        
-                        this.emitterShadowJumpLeft.visible = false;
-                        this.emitterShadowJumpLeft.stop();
-                        this.emitterShadowFallLeft.visible = false;
-                        this.emitterShadowFallLeft.stop();
-                    }
-                    else if (this.player.anim == 'jump') {
-                        this.emitterShadowJumpLeft.setPosition(this.player.x, this.player.y);
-                        this.emitterShadowJumpLeft.start();
-                        this.emitterShadowJumpLeft.visible = true
-        
-                        this.emitterShadowRunLeft.visible = false;
-                        this.emitterShadowRunLeft.stop();
-                        this.emitterShadowFallLeft.visible = false;
-                        this.emitterShadowFallLeft.stop();
-                    }
-                    else if (this.player.anim == 'fall') {
-                        this.emitterShadowFallLeft.setPosition(this.player.x, this.player.y);
-                        this.emitterShadowFallLeft.start();
-                        this.emitterShadowFallLeft.visible = true
-        
-                        this.emitterShadowRunLeft.visible = false;
-                        this.emitterShadowRunLeft.stop();
-                        this.emitterShadowJumpLeft.visible = false;
-                        this.emitterShadowJumpLeft.stop();
-                    }
-                    else if (this.player.anim == 'idle') {
-                        this.emitterShadowRunLeft.visible = false;
-                        this.emitterShadowRunLeft.stop();
-                        this.emitterShadowJumpLeft.visible = false;
-                        this.emitterShadowJumpLeft.stop();
-                        this.emitterShadowFallLeft.visible = false;
-                        this.emitterShadowFallLeft.stop();
-                    }
                 }
-        */
+                this.emitterShadowRun.setPosition(this.player.x, this.player.y);
+                this.emitterDust.setPosition(this.player.x, this.player.y + 100);
+            }
+            else if (this.player.anim == 'jump') {
+                if (this.emitterJump == false) {
+                    this.emitterJump = true
+                    this.emitterShadowJump.start();
+                    this.emitterShadowJumpLeft.stop();
+                    this.emitterShadowRun.stop();
+                    this.emitterShadowFall.stop();
+                    this.emitterDust.stop();
+                    this.emitterFall = false;
+                    this.emitterRun = false;
+                    this.runSound.stop();
+                    this.emitterShadowJumpLeft.stop();
+                    this.emitterShadowRun.stop();
+                    this.emitterShadowFall.stop();
+                }
+                this.emitterShadowJump.setPosition(this.player.x, this.player.y);
+            }
+            else if (this.player.anim == 'fall') {
+                if (this.emitterFall == false) {
+                    this.emitterFall = true
+                    this.emitterShadowFall.start();
+                    this.emitterShadowFallLeft.stop();
+                    this.emitterShadowJump.stop();
+                    this.emitterShadowRun.stop();
+                    this.emitterRun = false;
+                    this.emitterJump = false;
+                    this.emitterDust.stop();
+                    this.runSound.stop();
+                    this.emitterShadowFallLeft.stop();
+                    this.emitterShadowJump.stop();
+                    this.emitterShadowRun.stop();
 
 
-        this.lumiereTest.setIntensity(this.variationIntensity);
-        //this.lumiere.setIntensity(this.variationIntensity);
-
-        // this.calque_light.objects.forEach((eachLumiere, index) => {
-        //     // Modifier l'intensité de la lumière
-        //     eachLumiere.setIntensity(this.variationIntensity);
-        //   });
-
-        if (this.lightVar == 'down') { // variation de luminosité
-            this.variationIntensity -= 0.06;
-            //this.lumiere.setIntensity(this.variationIntensity)
-
-            //this.lumiere.radius -= 0.2;
-            if (this.variationIntensity < 2.8) {
-                this.lightVar = 'up'
+                }
+                this.emitterShadowFall.setPosition(this.player.x, this.player.y);
+            }
+            else if (this.player.anim == 'idle') {
+                this.emitterShadowRunLeft.stop();
+                this.emitterShadowJumpLeft.stop();
+                this.emitterShadowFallLeft.stop();
+                this.emitterShadowRun.stop();
+                this.emitterShadowJump.stop();
+                this.emitterShadowFall.stop();
+                this.emitterRun = false;
+                this.emitterJump = false;
+                this.emitterFall = false;
+                this.emitterDust.stop();
+                this.runSound.stop();
             }
         }
-        if (this.lightVar == 'up') { // variation de luminosité
-            this.variationIntensity += 0.06;
-            //this.lumiere.setIntensity(this.variationIntensity)
-            //this.lumiere.radius += 0.2;
-            if (this.variationIntensity > 3.2) {
-                this.lightVar = 'down'
+        else {
+            this.emitterRun = false;
+            this.emitterFall = false;
+            this.emitterJump = false;
+            if (this.player.anim == 'run') {
+                if (this.emitterRunLeft == false) {
+                    this.emitterRunLeft = true
+                    this.emitterShadowRunLeft.start();
+                    this.emitterDust.start();
+                    this.emitterDust.visible = true;
+                    this.emitterShadowRun.stop();
+                    this.emitterShadowJumpLeft.stop();
+                    this.emitterShadowFallLeft.stop();
+                    this.emitterFallLeft = false;
+                    this.emitterJumpLeft = false;
+                    this.runSound.play();
+                }
+                this.emitterShadowRunLeft.setPosition(this.player.x, this.player.y);
+                this.emitterDust.setPosition(this.player.x, this.player.y + 100);
+            }
+            else if (this.player.anim == 'jump') {
+                if (this.emitterJumpLeft == false) {
+                    this.emitterJumpLeft = true
+                    this.emitterShadowJumpLeft.start();
+                    this.emitterShadowJump.stop();
+                    this.emitterShadowRunLeft.stop();
+                    this.emitterShadowFallLeft.stop();
+                    this.emitterFallLeft = false;
+                    this.emitterRunLeft = false;
+                    this.emitterDust.stop();
+                    this.runSound.stop();
+                }
+                this.emitterShadowJumpLeft.setPosition(this.player.x, this.player.y);
+            }
+            else if (this.player.anim == 'fall') {
+                if (this.emitterFallLeft == false) {
+                    this.emitterFallLeft = true
+                    this.emitterShadowFallLeft.start();
+                    this.emitterShadowFall.stop();
+                    this.emitterShadowJumpLeft.stop();
+                    this.emitterShadowRunLeft.stop();
+                    this.emitterRunLeft = false;
+                    this.emitterJumpLeft = false;
+                    this.emitterDust.stop();
+                    this.runSound.stop();
+                }
+                this.emitterShadowFallLeft.setPosition(this.player.x, this.player.y);
+            }
+            else if (this.player.anim == 'idle') {
+                this.emitterShadowRunLeft.stop();
+                this.emitterShadowJumpLeft.stop();
+                this.emitterShadowFallLeft.stop();
+                this.emitterShadowRun.stop();
+                this.emitterShadowJump.stop();
+                this.emitterShadowFall.stop();
+                this.emitterRunLeft = false;
+                this.emitterJumpLeft = false;
+                this.emitterFallLeft = false;
+                this.emitterDust.stop();
+                this.runSound.stop();
             }
         }
-
 
         this.lightPlayer.x = this.player.x;
         this.lightPlayer.y = this.player.y;
-
 
 
         if (this.physics.overlap(this.hitboxsLightExt, this.player)) { // lumière et semi obscurité
@@ -508,8 +505,24 @@ class niveau1 extends Phaser.Scene {
             this.UIvisibility.anims.play('invisible', true);
         }
 
+        if (this.silhouette.alpha > 0) {
+            this.silhouette.alpha -= 0.003;
+        }
 
-        this.silhouette.alpha -= 0.003;
+        if (this.player.dead == true) {
+            if (this.player.checkDead == false) {
+                this.player.checkDead = true;
+                this.cameras.main.fadeOut(1000, 255, 255, 255);
+                this.time.delayedCall(1000, () => {
+                    this.player.x = this.spawnPlayerX;
+                    this.player.y = this.spawnPlayerY;
+                    this.cameras.main.fadeIn(1000, 255, 255, 255);
+                    this.player.dead = false;
+                    this.player.checkDead = false;
+                });
+            }
+
+        }
 
         this.arrows.children.each(function (arrow) {
             if (arrow.spawn == true) {
@@ -517,12 +530,12 @@ class niveau1 extends Phaser.Scene {
 
                 // tir en direction du joueur
                 let dirX = this.player.x - arrow.x;
-                let dirY = this.player.y - arrow.y;
+                let dirY = this.player.y - 128 - arrow.y; // vise 1 case au dessus du joueur
                 let length = Math.sqrt(dirX ** 2 + dirY ** 2);
                 dirX /= length;
                 dirY /= length;
-                arrow.setVelocityX(dirX * 2000);
-                arrow.setVelocityY(dirY * 3000); // tir légèrement plus haut que le joueur
+                arrow.setVelocityX(dirX * 3000);
+                arrow.setVelocityY(dirY * 3000);
             }
             // orientation de la flèche selon sa vitesse
             arrow.angle = Phaser.Math.RadToDeg(Math.atan2(arrow.body.velocity.y, arrow.body.velocity.x));
@@ -544,7 +557,11 @@ class niveau1 extends Phaser.Scene {
                 circleEye.clear();
                 circleEye.fillStyle(0xffffff).fillCircle(mob.x, mob.y - 160, mob.jauge);
 
+                const symboleTraque = mob.getData('symboleTraque');
+                symboleTraque.setPosition(mob.x, mob.y - 360);
 
+                const symboleDistrait = mob.getData('symboleDistrait');
+                symboleDistrait.setPosition(mob.x, mob.y - 360);
 
                 // champ de vision selon sa direction
                 if (mob.body.velocity.x == 0) {
@@ -573,35 +590,30 @@ class niveau1 extends Phaser.Scene {
 
                 if (mob.seePlayer) {
                     this.silhouette.x = mob.seenXPlayer;
-                    this.silhouette.y = mob.seenYPlayer + 18;
+                    this.silhouette.y = mob.seenYPlayer + 128;
                     this.silhouette.alpha = 1;
                 }
 
+                if (mob.jauge <= 0) {
+                    mob.jauge = 0;
+                }
 
                 switch (mob.state) {
                     case 'traque':
-                        this.symboleTraque.x = mob.x;
-                        this.symboleTraque.y = mob.y - 360;
-                        this.symboleDistrait.visible = false;
-                        this.symboleTraque.visible = true;
+                        symboleDistrait.visible = false;
+                        symboleTraque.visible = true;
                         if (mob.ATK == false) {
                             if (mob.x < this.player.x - 20) { // si mob à gauche
-                                mob.setVelocityX(mob.speed * 1.5)
+                                mob.setVelocityX(mob.speed * 1.7)
                                 mob.direction = 'right';
                             }
                             else if (mob.x > this.player.x + 20) {
-                                mob.setVelocityX(-mob.speed * 1.5)
+                                mob.setVelocityX(-mob.speed * 1.7)
                                 mob.direction = 'left';
                             }
                         }
                         else {
-                            /*if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mob.x, mob.y) < 32 * 1) {
-                                // coup de katana qui tape à 64 pixels devant
-                                // si katana overlap player alors, reset au dernier checkpoint avec fondu au noir
-        
-                            }
-                            else*/
-                            if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mob.x, mob.y - 60) < 128 * 5) {
+                            if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mob.x, mob.y - 60) < 128 * 12) {
                                 // tir à l'arc                    
                                 // si arrow overlap player alors, reset au dernier checkpoint avec fondu au noir
                                 // flèches avec vélocité à 400 ? comme la vélocité max du kunai ?
@@ -611,40 +623,31 @@ class niveau1 extends Phaser.Scene {
                                     this.createArrow(mob.x, mob.y);
                                     this.time.delayedCall(mob.cdATK * 1000, () => {
                                         mob.shoot = false;
-
                                     });
                                 }
-
-
                             }
                         }
-
-
-                        if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mob.x, mob.y - 60) < 128 * 5) { // si mob est assez prêt il attaque
+                        if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mob.x, mob.y - 60) < 128 * 12) { // si mob est assez prêt il attaque
                             mob.ATK = true;
                         }
                         else {
                             mob.ATK = false;
                         }
-
-                        if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mob.x, mob.y) - 60 > 128 * 10) { // si le joueur est à 10 cases du mob, l'ennemi cesse la traque
+                        if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mob.x, mob.y) - 60 > 128 * 24) { // si le joueur est à 24 cases du mob, l'ennemi cesse la traque
                             mob.isWatching = false;
                             mob.state = 'watch'
                             break;
                         }
-
                         break;
 
                     case 'watch': // regarde autour, A CODER si j'ai le temps
-                        this.symboleDistrait.x = mob.x;
-                        this.symboleDistrait.y = mob.y - 360;
-                        this.symboleDistrait.visible = true;
-                        this.symboleTraque.visible = false;
+                        symboleDistrait.visible = true;
+                        symboleTraque.visible = false;
                         mob.setVelocityX(0);
                         if (mob.isWatching == false) {
                             mob.isWatching = true;
                             this.time.delayedCall(2000, () => { // demi tour après mob.waiting secondes
-                                if (mob.jauge < mob.jaugeTraque) {
+                                if (mob.jauge < mob.jaugeTraque && mob.state == 'watch') {
                                     mob.state = 'patrouille';
                                 }
                                 else {
@@ -665,13 +668,13 @@ class niveau1 extends Phaser.Scene {
                         }
 
                         if (mob.seePlayer) {
-                            mob.jauge += 1.9;
+                            mob.jauge += 1.7;
                         }
                         else {
                             mob.jauge -= 0.8;
                         }
 
-                        if (this.checkDistance(mob.x, mob.y, this.player.x, this.player.y) < 160) { // si le joueur est très près
+                        if (this.checkDistance(mob.x, mob.y, this.player.x, this.player.y) < 128) { // si le joueur est très près
                             mob.jauge += 2.4;
                         }
 
@@ -683,10 +686,8 @@ class niveau1 extends Phaser.Scene {
                         break;
 
                     case 'distrait': // déplacement vers la dernière position du joueur vu
-                        this.symboleDistrait.x = mob.x;
-                        this.symboleDistrait.y = mob.y - 360;
-                        this.symboleDistrait.visible = true;
-                        this.symboleTraque.visible = false;
+                        symboleDistrait.visible = true;
+                        symboleTraque.visible = false;
                         if (this.checkDistance(mob.x, mob.y - 60, this.player.x, this.player.y) < mob.scope &&
                             (mob.borneMin <= Math.abs(Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(mob.x, mob.y - 60, this.player.x, this.player.y))) &&
                                 Math.abs(Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(mob.x, mob.y - 60, this.player.x, this.player.y))) <= mob.borneMax) &&
@@ -701,7 +702,12 @@ class niveau1 extends Phaser.Scene {
                         if (mob.seePlayer) {
                             mob.seenXPlayer = this.player.x; // le mob garde en mémoire la dernière position visible du joueur
                             mob.seenYPlayer = this.player.y;
-                            mob.jauge += 1.9
+                            mob.jauge += 1.7
+                        }
+                        else if (this.checkDistance(mob.x, mob.y, this.player.x, this.player.y) < 128) {
+                            mob.seenXPlayer = this.player.x;
+                            mob.seenYPlayer = this.player.y;
+                            mob.jauge += 1.7
                         }
 
                         if (mob.x < mob.seenXPlayer - 20) { // si mob à gauche
@@ -722,8 +728,8 @@ class niveau1 extends Phaser.Scene {
                         }
 
 
-                        if (this.checkDistance(mob.x, mob.y, this.player.x, this.player.y) < 160) { // si le joueur est très près
-                            mob.jauge += 1.6;
+                        if (this.checkDistance(mob.x, mob.y, this.player.x, this.player.y) < 128) { // si le joueur est très près
+                            mob.jauge += 2.4;
                         }
 
                         if (mob.jauge >= mob.jaugeTraque) {
@@ -734,8 +740,8 @@ class niveau1 extends Phaser.Scene {
                         break;
 
                     case 'patrouille':
-                        this.symboleDistrait.visible = false;
-                        this.symboleTraque.visible = false;
+                        symboleDistrait.visible = false;
+                        symboleTraque.visible = false;
                         mob.isWatching = false;
                         if (mob.move == true) { // déplacement en mode patrouille
                             if (mob.direction == 'left') {
@@ -783,11 +789,11 @@ class niveau1 extends Phaser.Scene {
                                     mob.jauge += 1.9;
                                 }
                                 else if (this.stateVisibility == 'semivisible') {
-                                    mob.jauge += 0.9
+                                    mob.jauge += 0.3
                                 }
                                 else {
                                     if (this.player.body.velocity.x != 0) {
-                                        mob.jauge += 0.08;
+                                        mob.jauge += 0.17;
                                     }
                                     else {
                                         if (mob.jauge > 0) {
@@ -809,7 +815,8 @@ class niveau1 extends Phaser.Scene {
                         }
 
                         if (this.checkDistance(mob.x, mob.y - 60, this.player.x, this.player.y) < 160) { // si le joueur est très près
-                            mob.jauge += 1.6;
+                            mob.state = 'traque'
+                            mob.jauge = mob.jaugeTraque;
                         }
 
                         if (mob.jauge >= mob.jaugeDistrait) {
@@ -818,7 +825,6 @@ class niveau1 extends Phaser.Scene {
                         }
                         break;
                 }
-
             }, this)
         }
 
@@ -878,27 +884,13 @@ class niveau1 extends Phaser.Scene {
             }
         }
 
-
-        // demi tour au sol
-
-
-
-        // SAUT (analogique)
+        // SAUT (pas analogique)
 
         if ((this.cursors.up.isDown || this.keyZ.isDown || this.cursors.space.isDown) &&
             (this.player.body.blocked.down || this.player.coyoteTimer > 0) &&
             (this.cursors.down.isUp && this.keyS.isUp)) {
             this.player.jump();
         }
-
-        /*if (this.player.jumpActif == true) { // pour le saut analogique, A CORRIGER
-            this.player.jumpTimer -= 1;
-            this.player.hauteurSautFinal += 3
-            if ((this.cursors.up.isDown || this.keyZ.isDown || this.cursors.space.isDown) && this.player.jumpTimer > 0) {
-                this.player.setVelocityY(this.player.hauteurSautFinal)
-            }
-        }*/
-
 
         if (this.player.falling == true && this.player.body.blocked.down) {
             this.animLand.x = this.player.x;
@@ -907,21 +899,18 @@ class niveau1 extends Phaser.Scene {
             this.player.falling = false;
         }
 
-
-
-        // tant que je reste appuyé je garde une velocityY constante, cela s'arrête quand j'arrête d'appuyer ou au max du timer
-        // mettre un délai pour différencier saut court et saut long analogique
-
-        // AIR CONTROL
-
-        // friction en l'air
-
-        // demi tour en l'air
-
+        if (this.player.dustJump == true) {
+            this.animLand.x = this.player.x;
+            this.animLand.y = this.player.y + 128;
+            this.animLand.anims.play('animTP', true);
+            this.jumpSound.play();
+            this.player.dustJump = false;
+        }
 
         if (Phaser.Input.Keyboard.JustDown(this.keyT)) {
             console.log(this.player.x, this.player.y);
-            console.log(this.spawnPlayerX/128, this.spawnPlayerY/128)
+            console.log(this.spawnPlayerX / 128, this.spawnPlayerY / 128)
+            console.log(this.player.dead)
         }
     }
 
@@ -932,11 +921,8 @@ class niveau1 extends Phaser.Scene {
     }
 
     refreshCheckpoint() {
-        console.log("refresh")
-        console.log(this.spawnPlayerX)
         this.spawnPlayerX = 171 * 128;
         this.spawnPlayerY = 45 * 128;
-        console.log(this.spawnPlayerX)
     }
 
     overlapExt(player, hitboxLightExt) {
@@ -988,7 +974,6 @@ class niveau1 extends Phaser.Scene {
     }
 
     createArrow(mobX, mobY) {
-
         this.arrows.create(mobX, mobY, 'arrow');
         this.arrows.children.each(function (arrow) {
 
@@ -1005,8 +990,9 @@ class niveau1 extends Phaser.Scene {
 
     hitPlayer() {
         // animation de mort puis restart au dernier checkpoint
-        this.player.x = this.spawnPlayerX;
-        this.player.y = this.spawnPlayerY;
+        if (this.player.dead == false) {
+            this.player.dead = true;
+        }
     }
 
     pickUpKunai() {
@@ -1038,20 +1024,22 @@ class niveau1 extends Phaser.Scene {
             circleEye.fillStyle(0xffffff).fillCircle(mob.x, mob.y - 100, mob.jauge);
             mob.setData('circleEye', circleEye);
 
+            const symboleTraque = this.add.sprite(mob.x, mob.y - 360, 'symboleTraque').setScale(0.4);
+            symboleTraque.visible = false;
+            mob.setData('symboleTraque', symboleTraque);
+
+            const symboleDistrait = this.add.sprite(mob.x, mob.y - 360, 'symboleDistrait').setScale(0.4);
+            symboleDistrait.visible = false;
+            mob.setData('symboleDistrait', symboleDistrait);
+
             mob.state = 'patrouille'
             mob.move = true;
             mob.cdATK = false;
             mob.direction = "left";
-            // if (Math.random() < 0.5) {
-            //     mob.direction = 'left'
-            // }
-            // else {
-            //     mob.direction = 'right';
-            // }
 
             mob.angleVision = 0;
             mob.speed = 200;
-            mob.angleFOV = 20;
+            mob.angleFOV = 23;
             mob.scope = 128 * 7; // voit jusqu'à 7 cases devant
             mob.borneMin = 0;
             mob.borneMax = 0;
