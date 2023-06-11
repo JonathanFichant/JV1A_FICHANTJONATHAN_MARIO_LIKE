@@ -742,7 +742,7 @@ class niveau2 extends Phaser.Scene {
                         else {
                             mob.ATK = false;
                         }
-                        if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mob.x, mob.y) - 60 > 128 * 24) { // si le joueur est à 24 cases du mob, l'ennemi cesse la traque
+                        if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mob.x, mob.y) - 60 > 128 * 16) { // si le joueur est à 24 cases du mob, l'ennemi cesse la traque
                             mob.isWatching = false;
                             mob.state = 'watch'
                             break;

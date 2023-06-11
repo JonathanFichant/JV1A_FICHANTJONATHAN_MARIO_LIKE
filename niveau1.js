@@ -277,8 +277,8 @@ class niveau1 extends Phaser.Scene {
         this.physics.add.existing(this.hitboxCheckpoint);
         this.hitboxCheckpoint.body.setAllowGravity(false);
         this.hitboxCheckpoint.setVisible(false);
-        this.spawnPlayerX = 75 * 128;
-        this.spawnPlayerY = 53 * 128;
+        this.spawnPlayerX = 69 * 128;
+        this.spawnPlayerY = 55 * 128;
         this.physics.add.overlap(this.hitboxCheckpoint, this.player, this.refreshCheckpoint, null, this);
 
 
@@ -632,7 +632,7 @@ class niveau1 extends Phaser.Scene {
                         else {
                             mob.ATK = false;
                         }
-                        if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mob.x, mob.y) - 60 > 128 * 24) { // si le joueur est à 24 cases du mob, l'ennemi cesse la traque
+                        if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mob.x, mob.y) - 60 > 128 * 13) { // si le joueur est à 24 cases du mob, l'ennemi cesse la traque
                             mob.isWatching = false;
                             mob.state = 'watch'
                             break;
@@ -856,8 +856,9 @@ class niveau1 extends Phaser.Scene {
 
 
         // Offset camera en Y
-        if (this.keyS.isDown || this.player.anim == 'fall') {
+        if (this.keyS.isDown || this.cursors.down.isDown ||this.player.anim == 'fall') {
             this.cameras.main.followOffset.y = -256;
+            console.log("why")
         }
         else {
             if (this.player.anim == 'jump') {
@@ -920,8 +921,8 @@ class niveau1 extends Phaser.Scene {
     }
 
     refreshCheckpoint() {
-        this.spawnPlayerX = 171 * 128;
-        this.spawnPlayerY = 45 * 128;
+        this.spawnPlayerX = 166 * 128;
+        this.spawnPlayerY = 46 * 128;
     }
 
     overlapExt(player, hitboxLightExt) {
