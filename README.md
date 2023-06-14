@@ -11,6 +11,6 @@ Inputs :
 
 - Saut + S / bas : Descendre de la plateforme
 
-- Clic droit : Tirer / Se téléporter
+- Clic gauche : Tirer / Se téléporter
 - F : Afficher la trajectoire
 
